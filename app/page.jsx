@@ -1,8 +1,25 @@
+'use client'
+import { useEffect } from "react";
+import Link from 'next/link';
+import Header from "@/components/Header";
 import CardPerDay from "@/components/CardPerDay";
+import Menu from "@/components/Menu";
+import { Icon } from '@iconify/react';
 
 export default function Home() {
+  useEffect(() => { import('preline') }, [])
   return (
     <>
+      <Header>
+        <h1 className='text-3xl font-semibold'>Money Writer</h1>
+        <div className='flex gap-x-6 items-center'>
+          <Icon className='text-3xl' icon='ic:round-download' />
+          <Link href="/categories">
+            <Icon className='text-3xl' icon='carbon:report' />
+          </Link>
+          <Icon className='text-3xl' icon='mdi:graph-pie-outline' />
+        </div>
+      </Header>
       <div className="flex justify-between items-center px-16 bg-slate-50 py-6 border-b-2 border-slate-200">
         <div className='text-center'>
           <h4 className="font-semibold">Pemasukan</h4>
@@ -18,8 +35,9 @@ export default function Home() {
         </div>
       </div>
       <div className="flex flex-col gap-y-3 mt-2 mx-4">
-      <CardPerDay />
+        <CardPerDay />
       </div>
+      <Menu />
     </>
   )
 }
