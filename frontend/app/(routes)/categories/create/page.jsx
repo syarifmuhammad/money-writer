@@ -1,68 +1,21 @@
 'use client'
 
-import { useState } from "react";
+import FormCategory from "../form";
 import Header from "@/components/Header";
+import Link from 'next/link';
 import { Icon } from '@iconify/react';
-import Link from 'next/link'
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from 'next/navigation'
 
-
-function CardCategory({ category }) {
-    return (
-        <div className="flex items-center justify-between gap-y-2 bg-white p-4 shadow-md rounded-md">
-            <p>{category.category}</p>
-            <Link href="/categories/edit">
-                <Icon icon="bx:pencil" className="text-2xl cursor-pointer text-blue-500" />
-            </Link>
-        </div>
-    )
-}
-
-function ListOfCategory({ categories }) {
-    return (
-        <div className="flex flex-col gap-y-2">
-            {categories.map((category, index) => (
-                <CardCategory key={index} category={category} />
-            ))}
-        </div>
-    )
-}
-
-
-export default function Home() {
-
+export default function Create() {
     const router = useRouter()
     const searchParams = useSearchParams()
-    const jenis_transaksi = searchParams.get('jenis_transaksi')
-
-    const categories = [
-        {
-            id: 1,
-            category: 'Makanan'
-        },
-        {
-            id: 2,
-            category: 'Minuman'
-        },
-        {
-            id: 3,
-            category: 'Kesehatan'
-        },
-        {
-            id: 4,
-            category: 'Olahraga'
-        },
-        {
-            id: 5,
-            category: 'Belanja'
-        }
-    ]
+    const jenis_transaksi = searchParams.get('jenis_transaksi') ?? 'pengeluaran'
 
     function onChangeTypeOfTransaction() {
         if (jenis_transaksi === 'pengeluaran') {
-            router.push('/categories?jenis_transaksi=pemasukan')
+            router.push('/categories/create?jenis_transaksi=pemasukan')
         } else {
-            router.push('/categories?jenis_transaksi=pengeluaran')
+            router.push('/categories/create?jenis_transaksi=pengeluaran')
         }
     }
 
@@ -70,14 +23,12 @@ export default function Home() {
         <>
             <Header>
                 <div className='flex gap-x-12 items-center'>
-                    <Link href="/">
+                    <Link href="/categories">
                         <Icon className='text-3xl' icon='bx:arrow-back' />
                     </Link>
-                    <h1 className='text-3xl font-semibold'>Kategori</h1>
+                    <h1 className='text-3xl font-semibold'>Tambah Kategori</h1>
                 </div>
-                <Link href="/categories/create">
-                    <Icon icon="bx:plus" className="text-3xl cursor-pointer" />
-                </Link>
+                {/* <Icon icon="bx:plus" className="text-3xl cursor-pointer" /> */}
             </Header>
             <div className="mt-4 w-full flex justify-center">
                 <div className="flex items-center mb-4">
@@ -93,9 +44,7 @@ export default function Home() {
                     <label htmlFor="hs-basic-with-description" className="text-lg text-green-500 ms-3">Pemasukan</label>
                 </div>
             </div>
-            <div className="px-10">
-                <ListOfCategory categories={categories} />
-            </div>
+            <FormCategory jenis_transaksi={jenis_transaksi} />
         </>
     )
 }

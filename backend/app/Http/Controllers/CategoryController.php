@@ -13,7 +13,8 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::where('user_id', auth()->user()->id)->orWhere('user_id', null)->get();
+        $categories = Category::all();
+        // $categories = Category::where('user_id', auth()->user()->id)->orWhere('user_id', null)->get();
         return new CategoryCollection($categories);
     }
 
@@ -22,7 +23,16 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $category = new Category();
+        $category->name = $request->name;
+        $category->user_id = 1;
+        $category->type = $request->jenis_transaksi;
+        $category->save();
+
+        return response()->json([
+            'message' => 'Category created successfully',
+            'data' => $category
+        ]);
     }
 
     /**
