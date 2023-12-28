@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from "react";
-import Header from "@/components/Header";
+import Header from "@/app/_components/Header";
 import { Icon } from '@iconify/react';
 import Link from 'next/link'
 import { useRouter, useSearchParams } from "next/navigation";

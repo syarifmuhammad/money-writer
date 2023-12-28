@@ -1,21 +1,19 @@
 
-export default function Form({ children, title = 'Form', jenis_transaksi = 'pengeluaran', onSubmit }) {
+import { insert } from '@/app/_services/categories.jsx'
+
+export default function Form({ children, title = 'Form', jenis_transaksi = 'pengeluaran', onSubmit = null }) {
     const submit = async (e) => {
         e.preventDefault()
         const data = {
             name: e.target[0].value,
             jenis_transaksi: jenis_transaksi
         }
-        const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/categories`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data),
-        })
 
-        const result = await res.json()
-        onSubmit(result)
+        const result = await insert(data)
+        
+        if (onSubmit) {
+            onSubmit(result)
+        }
     }
     return (
         <div className="px-10">

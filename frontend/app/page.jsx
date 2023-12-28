@@ -1,9 +1,9 @@
 'use client'
 import { useEffect } from "react";
 import Link from 'next/link';
-import Header from "@/components/Header";
-import CardPerDay from "@/components/CardPerDay";
-import Menu from "@/components/Menu";
+import Header from "@/app/_components/Header";
+import CardPerDay from "@/app/_components/CardPerDay";
+import Menu from "@/app/_components/Menu";
 import { Icon } from '@iconify/react';
 
 export default function Home() {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\TransactionCollection;
+use App\Http\Resources\TransactionResource;
 use App\Models\Category;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
@@ -49,7 +50,7 @@ class TransactionController extends Controller
 
         return response()->json([
             'message' => 'Transaction created successfully',
-            'data' => $transaction
+            'data' => new TransactionResource($transaction)
         ]);
     }
 
@@ -58,7 +59,15 @@ class TransactionController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $transaction = Transaction::find($id);
+
+        if (!$transaction) {
+            return response()->json([
+                'message' => 'Transaction not found'
+            ], 404);
+        }
+
+        return new TransactionResource($transaction);
     }
 
     /**
@@ -66,7 +75,39 @@ class TransactionController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $validator = Validator::make($request->all(), [
+            'amount' => 'required|number',
+            'description' => 'string',
+            'category_id' => 'required|exists:categories,id'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => "Validasi form gagal !",
+                'errors' => $validator->errors()
+            ]);
+        }
+        
+        $transaction = Transaction::find($id);
+
+        if (!$transaction) {
+            return response()->json([
+                'message' => 'Transaction not found'
+            ], 404);
+        }
+
+        $category = Category::find($request->category_id);
+        $transaction->amount = $request->amount;
+        $transaction->description = $request->description;
+        $transaction->type = $category->type;
+        $transaction->category_id = $category->id;
+        $transaction->user_id = 1;
+        $transaction->save();
+
+        return response()->json([
+            'message' => 'Transaction updated successfully',
+            'data' => new TransactionResource($transaction)
+        ]);
     }
 
     /**
@@ -74,6 +115,18 @@ class TransactionController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $transaction = Transaction::find($id);
+
+        if (!$transaction) {
+            return response()->json([
+                'message' => 'Transaction not found'
+            ], 404);
+        }
+
+        $transaction->delete();
+
+        return response()->json([
+            'message' => 'Transaction deleted successfully'
+        ]);
     }
 }

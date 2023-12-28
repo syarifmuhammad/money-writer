@@ -1,7 +1,7 @@
 'use client'
 
-import FormCategory from "../../../categories/form";
-import Header from "@/components/Header";
+import FormCategory from "../../../_components/categories/form";
+import Header from "@/app/_components/Header";
 import Link from 'next/link';
 import { Icon } from '@iconify/react';
 import { useRouter, useSearchParams } from 'next/navigation'

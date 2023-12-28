@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\CategoryCollection;
+use App\Http\Resources\CategoryResource;
 use App\Models\Category;
 use Illuminate\Http\Request;
 
@@ -23,6 +24,11 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
+        $request->validate([
+            'name' => 'required|string',
+            'jenis_transaksi' => 'required|string'
+        ]);
+
         $category = new Category();
         $category->name = $request->name;
         $category->user_id = 1;
@@ -31,7 +37,7 @@ class CategoryController extends Controller
 
         return response()->json([
             'message' => 'Category created successfully',
-            'data' => $category
+            'data' => new CategoryResource($category)
         ]);
     }
 
@@ -40,7 +46,15 @@ class CategoryController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $category = Category::find($id);
+
+        if (!$category) {
+            return response()->json([
+                'message' => 'Category not found'
+            ], 404);
+        }
+
+        return new CategoryResource($category);
     }
 
     /**
@@ -48,7 +62,27 @@ class CategoryController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $request->validate([
+            'name' => 'required|string',
+            'jenis_transaksi' => 'required|string'
+        ]);
+
+        $category = Category::find($id);
+
+        if (!$category) {
+            return response()->json([
+                'message' => 'Category not found'
+            ], 404);
+        }
+
+        $category->name = $request->name;
+        $category->type = $request->jenis_transaksi;
+        $category->save();
+
+        return response()->json([
+            'message' => 'Category updated successfully',
+            'data' => new CategoryResource($category)
+        ]);
     }
 
     /**
@@ -56,6 +90,18 @@ class CategoryController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $category = Category::find($id);
+
+        if (!$category) {
+            return response()->json([
+                'message' => 'Category not found'
+            ], 404);
+        }
+
+        $category->delete();
+
+        return response()->json([
+            'message' => 'Category deleted successfully'
+        ]);
     }
 }
