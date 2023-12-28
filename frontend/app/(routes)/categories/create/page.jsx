@@ -1,6 +1,6 @@
 'use client'
 
-import FormCategory from "../form";
+import FormCategory from "../../../categories/form";
 import Header from "@/components/Header";
 import Link from 'next/link';
 import { Icon } from '@iconify/react';

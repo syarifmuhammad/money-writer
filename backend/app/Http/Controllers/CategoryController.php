@@ -11,9 +11,9 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $categories = Category::all();
+        $categories = Category::where('type', $request->jenis_transaksi ? $request->jenis_transaksi : 'pengeluaran')->get();
         // $categories = Category::where('user_id', auth()->user()->id)->orWhere('user_id', null)->get();
         return new CategoryCollection($categories);
     }
