@@ -16,9 +16,22 @@ class TransactionController extends Controller
      */
     public function index(Request $request)
     {
-        $transactions = Transaction::where('type', $request->jenis_transaksi ? $request->jenis_transaksi : 'pengeluaran')->get();
-        // $transactions = Transaction::where('user_id', auth()->user()->id)->orWhere('user_id', null)->get();
-        return new TransactionCollection($transactions);
+        $validator = Validator::make($request->all(), [
+            "month" => "date_format:Y-m"
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+        $date = explode('-', $request->month ?? date('Y-m'));
+        $month = $date[1];
+        $year = $date[0];
+        $date = Transaction::select('created_at as date')->whereYear('created_at', '=', $year)
+            ->whereMonth('created_at', '=', $month)->orderBy('created_at')->distinct()->get();
+        return $date;
+        // $response = [];
+        // // $transactions = Transaction::where('user_id', auth()->user()->id)->orWhere('user_id', null)->get();
+        // return new TransactionCollection($transactions);
     }
 
     /**
@@ -29,7 +42,8 @@ class TransactionController extends Controller
         $validator = Validator::make($request->all(), [
             'amount' => 'required|number',
             'description' => 'string',
-            'category_id' => 'required|exists:categories,id'
+            'category_id' => 'required|exists:categories,id',
+            'type' => 'required|in:pengeluaran,pemasukan'
         ]);
 
         if ($validator->fails()) {
@@ -38,7 +52,7 @@ class TransactionController extends Controller
                 'errors' => $validator->errors()
             ]);
         }
-        
+
         $category = Category::find($request->category_id);
         $transaction = new Transaction();
         $transaction->amount = $request->amount;
@@ -87,7 +101,7 @@ class TransactionController extends Controller
                 'errors' => $validator->errors()
             ]);
         }
-        
+
         $transaction = Transaction::find($id);
 
         if (!$transaction) {
