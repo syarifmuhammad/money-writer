@@ -2,71 +2,60 @@
 
 import { revalidatePath } from "next/cache"
 import { redirect } from 'next/navigation'
+import axios from '@/app/_lib/axiosConfig'
 
-async function getData(month = new Date().getFullYear() + '-' + (new Date().getMonth() + 1), page = 1) {
-    const fetch_transactions = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/transactions?month=${month}`)
-    const result = await fetch_transactions.json()
-    return result.data
+async function getData(month = new Date().getFullYear() + '-' + (new Date().getMonth() + 1).toString().padStart(2, '0')) {
+    const response = await axios.get(`/transactions?month=${month}`)
+    return response.data
 }
 
 async function getDataById(id) {
-    const fetch_category = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/transactions/${id}`)
-    const result = await fetch_category.json()
-    return result.data
-
+    const response = await axios.get(`/transactions/${id}`)
+    return response.data.data
 }
 
 async function insert(formData) {
+    let success = false
     try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/transactions`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                amount: formData.get('amount'),
-                description: formData.get('description'),
-                category_id: formData.get('category_id'),
-                type: formData.get('jenis_transaksi'),
-            }),
-        })
-
-        if (!res.ok) {
-            switch (res.status) {
-                case 400: console.log(await res.json()); break;
-                case 401: console.log(await res.json()); break;
-                case 404: console.log(await res.json()); break;
-                case 500: console.log(await res.json()); break;
-            }
+        let payload = {
+            date: formData.get('date'),
+            amount: formData.get('amount'),
+            description: formData.get('description'),
+            category_id: formData.get('category_id'),
         }
-
+        await axios.post(`/transactions`, payload)
         revalidatePath('/')
-        redirect(`/`)
+        success = true
     } catch (err) {
-        console.log(err)
+        console.log(err.response.data)
+    } finally {
+        if (success) {
+            redirect(`/`)
+        }
     }
 }
 
 async function update(formData) {
-    await fetch(`${process.env.NEXT_PUBLIC_URL_API}/transactions/${formData.get('id')}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            name: formData.get('name'),
-            jenis_transaksi: formData.get('jenis_transaksi')
-        }),
-    })
-    revalidatePath('/transactions')
-    redirect(`/transactions?jenis_transaksi=${formData.get('jenis_transaksi')}`)
+    let success = false
+    try {
+        await axios.put(`/transactions/${formData.get('id')}`, {
+            name: formData.get('name')
+        })
+        revalidatePath('/transactions')
+        success = true
+    } catch (err) {
+        console.log(err.data)
+    } finally {
+        if (success) {
+            redirect(`/transactions?jenis_transaksi=${formData.get('jenis_transaksi')}`)
+        }
+    }
+
 }
 
 async function deleteData(formData) {
     let id = formData.get('id')
-    await fetch(`${process.env.NEXT_PUBLIC_URL_API}/transactions/${id}`, {
-        method: 'DELETE',
-    })
+    await axios.delete(`/transactions/${id}`)
     revalidatePath('/transactions')
 }
 

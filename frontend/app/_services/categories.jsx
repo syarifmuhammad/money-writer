@@ -2,56 +2,63 @@
 
 import { revalidatePath } from "next/cache"
 import { redirect } from 'next/navigation'
+import axios from '@/app/_lib/axiosConfig'
 
 async function getData(jenis_transaksi = 'pengeluaran') {
-    const fetch_categories = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/categories?jenis_transaksi=${jenis_transaksi}`)
-    const result = await fetch_categories.json()
-    return result.data
+    const response = await axios.get(`/categories?jenis_transaksi=${jenis_transaksi}`)
+    return response.data.data
 }
 
 async function getDataById(id) {
-    const fetch_category = await fetch(`${process.env.NEXT_PUBLIC_URL_API}/categories/${id}`)
-    const result = await fetch_category.json()
-    return result.data
+    const response = await axios.get(`/categories/${id}`)
+    return response.data.data
 
 }
 
 async function insert(formData) {
-    await fetch(`${process.env.NEXT_PUBLIC_URL_API}/categories`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
+    let success = false
+    try {
+        await axios.post(`/categories`, {
             name: formData.get('name'),
             jenis_transaksi: formData.get('jenis_transaksi')
-        }),
-    })
-    revalidatePath('/categories')
-    redirect(`/categories?jenis_transaksi=${formData.get('jenis_transaksi')}`)
+        })
+        revalidatePath('/categories')
+        success = true
+    } catch (err) {
+        console.log(err)
+    } finally {
+        if (success) {
+            redirect(`/categories?jenis_transaksi=${formData.get('jenis_transaksi')}`)
+        }
+    }
 }
 
 async function update(formData) {
-    await fetch(`${process.env.NEXT_PUBLIC_URL_API}/categories/${formData.get('id')}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
+    let success = false
+    try {
+        await axios.put(`/categories/${formData.get('id')}`, {
             name: formData.get('name'),
             jenis_transaksi: formData.get('jenis_transaksi')
-        }),
-    })
-    revalidatePath('/categories')
-    redirect(`/categories?jenis_transaksi=${formData.get('jenis_transaksi')}`)
+        })
+        revalidatePath('/categories')
+        success = true
+    } catch (err) {
+        console.log(err)
+    } finally {
+        if (success) {
+            redirect(`/categories?jenis_transaksi=${formData.get('jenis_transaksi')}`)
+        }
+    }
 }
 
 async function deleteData(formData) {
     let id = formData.get('id')
-    await fetch(`${process.env.NEXT_PUBLIC_URL_API}/categories/${id}`, {
-        method: 'DELETE',
-    })
-    revalidatePath('/categories')
+    try {
+        await axios.delete(`/categories/${id}`)
+        revalidatePath('/categories')
+    } catch (err) {
+        console.log(err)
+    }
 }
 
 export { getData, getDataById, insert, update, deleteData }

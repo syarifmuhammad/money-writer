@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\TransactionCollection;
 use App\Http\Resources\TransactionResource;
+use App\Http\Resources\TransactionPerDayResource;
 use App\Models\Category;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class TransactionController extends Controller
 {
@@ -21,17 +23,36 @@ class TransactionController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            $request['month'] = date('Y-m');
         }
         $date = explode('-', $request->month ?? date('Y-m'));
         $month = $date[1];
         $year = $date[0];
-        $date = Transaction::select('created_at as date')->whereYear('created_at', '=', $year)
+        $response = Transaction::select(DB::raw('DATE(created_at) as date'))->whereYear('created_at', '=', $year)
             ->whereMonth('created_at', '=', $month)->orderBy('created_at')->distinct()->get();
-        return $date;
-        // $response = [];
-        // // $transactions = Transaction::where('user_id', auth()->user()->id)->orWhere('user_id', null)->get();
-        // return new TransactionCollection($transactions);
+
+        $total_pemasukan = 0;
+        $total_pengeluaran = 0;
+
+        foreach ($response as $key => $value) {
+            $transactions = Transaction::whereDate('created_at', $value->date)->get();
+            $response[$key]['transactions'] = $transactions;
+            if ($transactions->count() > 0) {
+                foreach ($transactions as $transaction) {
+                    if ($transaction->category->type == 'pemasukan') {
+                        $total_pemasukan += $transaction->amount;
+                    } else {
+                        $total_pengeluaran += $transaction->amount;
+                    }
+                }
+            }
+        }
+
+        return [
+            'total_pemasukan' => $total_pemasukan,
+            'total_pengeluaran' => $total_pengeluaran,
+            'data' => TransactionPerDayResource::collection($response)
+        ];
     }
 
     /**
@@ -40,26 +61,25 @@ class TransactionController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'amount' => 'required|number',
-            'description' => 'string',
-            'category_id' => 'required|exists:categories,id',
-            'type' => 'required|in:pengeluaran,pemasukan'
+            'date' => 'required|date_format:Y-m-d',
+            'amount' => 'required',
+            'category_id' => 'required|exists:categories,id'
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'message' => "Validasi form gagal !",
                 'errors' => $validator->errors()
-            ]);
+            ], 422);
         }
 
         $category = Category::find($request->category_id);
         $transaction = new Transaction();
         $transaction->amount = $request->amount;
-        $transaction->description = $request->description;
-        $transaction->type = $category->type;
+        $transaction->description = $request->description ?? "";
         $transaction->category_id = $category->id;
         $transaction->user_id = 1;
+        $transaction->created_at = $request->date;
         $transaction->save();
 
         return response()->json([
@@ -90,7 +110,8 @@ class TransactionController extends Controller
     public function update(Request $request, string $id)
     {
         $validator = Validator::make($request->all(), [
-            'amount' => 'required|number',
+            'date' => "required|date_format:Y-m-d",
+            'amount' => 'required',
             'description' => 'string',
             'category_id' => 'required|exists:categories,id'
         ]);
@@ -99,7 +120,7 @@ class TransactionController extends Controller
             return response()->json([
                 'message' => "Validasi form gagal !",
                 'errors' => $validator->errors()
-            ]);
+            ], 422);
         }
 
         $transaction = Transaction::find($id);
@@ -113,9 +134,9 @@ class TransactionController extends Controller
         $category = Category::find($request->category_id);
         $transaction->amount = $request->amount;
         $transaction->description = $request->description;
-        $transaction->type = $category->type;
         $transaction->category_id = $category->id;
         $transaction->user_id = 1;
+        $transaction->created_at = $request->date;
         $transaction->save();
 
         return response()->json([

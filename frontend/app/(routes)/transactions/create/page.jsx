@@ -1,8 +1,9 @@
 import Header from "@/app/_components/Header";
 import SwitcherTransactionType from "@/app/_components/SwitcherTransactionType";
-// import { Icon } from '@iconify/react';
 import { getData } from "@/app/_services/categories"
 import { insert } from "@/app/_services/transactions"
+import Link from 'next/link';
+import { BiArrowBack } from "react-icons/bi";
 
 export default async function Home(props) {
     let params = props.searchParams
@@ -15,7 +16,9 @@ export default async function Home(props) {
         <>
             <Header>
                 <div className='flex gap-x-12 items-center'>
-                    {/* <Icon className='text-3xl' icon='bx:arrow-back' /> */}
+                    <Link href='/'>
+                        <BiArrowBack className='text-3xl' />
+                    </Link>
                     <h1 className='text-3xl font-semibold'>Tambah Transaksi</h1>
                 </div>
             </Header>
@@ -23,7 +26,10 @@ export default async function Home(props) {
                 <SwitcherTransactionType jenis_transaksi={jenis_transaksi} />
             </div>
             <form className="px-10" action={insert}>
-                <input type="hidden" name="jenis_transaksi" value={jenis_transaksi} />
+                <div className="mb-4">
+                    <label className="block text-sm font-medium mb-2">Tanggal</label>
+                    <input type="date" name="date" className="form-control" defaultValue={`${new Date().getFullYear()}-${(new Date().getMonth()+1).toString().padStart(2, '0')}-${new Date().getDate().toString().padStart(2, "0")}`} />
+                </div>
                 <div className="mb-4">
                     <label className="block text-sm font-medium mb-2">Kategori</label>
                     <select className="form-control" name="category_id">
