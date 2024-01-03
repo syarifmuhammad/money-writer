@@ -34,34 +34,42 @@ class DatabaseSeeder extends Seeder
             [
                 'type' => 'pemasukan',
                 'name' => 'Gaji',
+                'user_id' => 1,
             ],
             [
                 'type' => 'pemasukan',
                 'name' => 'Hadiah',
+                'user_id' => 1,
             ],
             [
                 'type' => 'pengeluaran',
                 'name' => 'Makanan',
+                'user_id' => 1,
             ],
             [
                 'type' => 'pengeluaran',
                 'name' => 'Pakaian',
+                'user_id' => 1,
             ],
             [
                 'type' => 'pengeluaran',
                 'name' => 'Kesehatan',
+                'user_id' => 1,
             ],
             [
                 'type' => 'pengeluaran',
                 'name' => 'Transportasi',
+                'user_id' => 1,
             ],
             [
                 'type' => 'pengeluaran',
                 'name' => 'Hiburan',
+                'user_id' => 1,
             ],
             [
                 'type' => 'pengeluaran',
                 'name' => 'Lainnya',
+                'user_id' => 1,
             ],
         ];
 
@@ -69,6 +77,7 @@ class DatabaseSeeder extends Seeder
             Category::create([
                 'type' => $category['type'],
                 'name' => $category['name'],
+                'user_id' => $category['user_id'],
             ]);
         }
     }

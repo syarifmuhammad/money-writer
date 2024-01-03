@@ -39,7 +39,10 @@ async function update(formData) {
     let success = false
     try {
         await axios.put(`/transactions/${formData.get('id')}`, {
-            name: formData.get('name')
+            date: formData.get('date'),
+            amount: formData.get('amount'),
+            description: formData.get('description'),
+            category_id: formData.get('category_id'),
         })
         revalidatePath('/transactions')
         success = true
@@ -47,7 +50,8 @@ async function update(formData) {
         console.log(err.data)
     } finally {
         if (success) {
-            redirect(`/transactions?jenis_transaksi=${formData.get('jenis_transaksi')}`)
+            let month = new Date(formData.get('date')).getFullYear() + '-' + (new Date(formData.get('date')).getMonth() + 1).toString().padStart(2, '0')
+            redirect(`/?month=${month}`)
         }
     }
 
