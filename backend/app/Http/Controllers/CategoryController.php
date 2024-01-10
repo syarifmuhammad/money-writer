@@ -26,7 +26,7 @@ class CategoryController extends Controller
     {
         $request->validate([
             'name' => 'required|string',
-            'jenis_transaksi' => 'required|string'
+            'jenis_transaksi' => 'required|in:pengeluaran,pemasukan'
         ]);
 
         $category = new Category();

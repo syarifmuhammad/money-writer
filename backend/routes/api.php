@@ -28,6 +28,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
     Route::apiResource('categories', CategoryController::class);
     Route::apiResource('transactions', TransactionController::class);
-
+    Route::get('chart', [TransactionController::class, 'chart']);
+    Route::get('report', [TransactionController::class, 'report']);
 // });
 

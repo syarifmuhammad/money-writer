@@ -4,17 +4,22 @@ import { revalidatePath } from "next/cache"
 import { redirect } from 'next/navigation'
 import axios from '@/app/_lib/axiosConfig'
 
-async function getData(month = new Date().getFullYear() + '-' + (new Date().getMonth() + 1).toString().padStart(2, '0')) {
+export async function getData(month = new Date().getFullYear() + '-' + (new Date().getMonth() + 1).toString().padStart(2, '0')) {
     const response = await axios.get(`/transactions?month=${month}`)
     return response.data
 }
 
-async function getDataById(id) {
+export async function getDataById(id) {
     const response = await axios.get(`/transactions/${id}`)
     return response.data.data
 }
 
-async function insert(formData) {
+export async function chart(month) {
+    const response = await axios.get(`/chart?month=${month}`)
+    return response.data
+}
+
+export async function insert(formData) {
     let success = false
     try {
         let payload = {
@@ -35,7 +40,7 @@ async function insert(formData) {
     }
 }
 
-async function update(formData) {
+export async function update(formData) {
     let success = false
     try {
         await axios.put(`/transactions/${formData.get('id')}`, {
@@ -57,10 +62,8 @@ async function update(formData) {
 
 }
 
-async function deleteData(formData) {
+export async function deleteData(formData) {
     let id = formData.get('id')
     await axios.delete(`/transactions/${id}`)
     revalidatePath('/transactions')
 }
-
-export { getData, getDataById, insert, update, deleteData }

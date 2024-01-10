@@ -2,10 +2,10 @@
 
 import { IoIosArrowForward, IoIosArrowBack } from "react-icons/io";
 import { useRouter } from "next/navigation";
+// import { useEffect } from 'react';
 
 export default function MonthSelector({ month = new Date().getFullYear() + "-" + (parseInt(new Date().getMonth()) + 1).toString().padStart(2, "0") }) {
     const router = useRouter()
-
     function setMonthToParams(val) {
         router.push(`?month=${val}`)
     }

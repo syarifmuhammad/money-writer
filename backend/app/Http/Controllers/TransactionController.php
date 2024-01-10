@@ -10,6 +10,7 @@ use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class TransactionController extends Controller
 {
@@ -53,6 +54,60 @@ class TransactionController extends Controller
             'total_pengeluaran' => $total_pengeluaran,
             'data' => TransactionPerDayResource::collection($response)
         ];
+    }
+
+    public function chart(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            "month" => "date_format:Y-m"
+        ]);
+
+        if ($validator->fails()) {
+            $request['month'] = date('Y-m');
+        }
+        $date = explode('-', $request->month ?? date('Y-m'));
+        $month = $date[1];
+        $year = $date[0];
+
+        $pengeluaran = Transaction::whereHas('category', function ($query) {
+            $query->where('type', 'pengeluaran');
+        })->select(DB::raw('SUM(amount) as total'))->whereYear('created_at', '=', $year)
+            ->whereMonth('created_at', '=', $month)->first();
+
+        $pemasukan = Transaction::whereHas('category', function ($query) {
+            $query->where('type', 'pemasukan');
+        })->select(DB::raw('SUM(amount) as total'))->whereYear('created_at', '=', $year)
+            ->whereMonth('created_at', '=', $month)->first();
+        return response()->json([
+            'pengeluaran' => $pengeluaran->total ?? 0,
+            'pemasukan' => $pemasukan->total ?? 0
+        ]);
+    }
+
+    public function report(Request $request) {
+        $validator = Validator::make($request->all(), [
+            "from" => "required|date",
+            "until" => "required|date|after_or_equal:from",
+            "type" => "required|in:semua_jenis,pengeluaran,pemasukan"
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => "Validasi form gagal !",
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $transactions = Transaction::whereHas('category', function ($query) use ($request) {
+            if ($request->type != 'semua_jenis') {
+                $query->where('type', $request->type);
+            }
+        })->whereBetween('created_at', [$request->from, $request->until])->get();
+
+        $pdf = PDF::loadView('pdf.transactions_report', [ 'transactions' => $transactions, 'from' => $request->from, 'until' => $request->until ]);
+
+        $nama_file = date('d-m-Y', strtotime($request->from)) . ' s.d ' . date('d-m-Y', strtotime($request->until));
+        return $pdf->download("$nama_file.pdf");
     }
 
     /**

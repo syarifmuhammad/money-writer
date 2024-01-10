@@ -17,18 +17,22 @@ function isValidDate(dateString) {
 export default async function Home({ searchParams }) {
   let month = isValidDate(searchParams.month) ? searchParams.month : new Date().getFullYear() + '-' + (new Date().getMonth() + 1).toString().padStart(2, '0')
   let transactions = []
-  let {data, total_pemasukan, total_pengeluaran} = await getData(month)
+  let { data, total_pemasukan, total_pengeluaran } = await getData(month)
   transactions = data
   return (
     <>
       <Header>
         <h1 className='text-3xl font-semibold'>Money Writer</h1>
         <div className='flex gap-x-6 items-center'>
-          <IoMdDownload className='text-3xl' />
+          <Link href="/reports">
+            <IoMdDownload className='text-3xl' />
+          </Link>
           <Link href="/categories">
             <HiOutlineDocumentReport className='text-3xl' />
           </Link>
-          <FaChartPie className='text-3xl' />
+          <Link href="/chart">
+            <FaChartPie className='text-3xl' />
+          </Link>
         </div>
       </Header>
       <div className="flex justify-between items-center px-16 bg-slate-50 py-6 border-b-2 border-slate-200">
