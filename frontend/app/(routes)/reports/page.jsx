@@ -34,11 +34,11 @@ export default function ReportPage() {
                 <div className="mb-4 flex gap-x-4 w-full">
                     <div className="w-full">
                         <label className="block text-sm font-medium mb-2">Dari Tanggal</label>
-                        <input type="from" name="from" className="form-control" defaultValue={`${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, '0')}-${new Date().getDate().toString().padStart(2, "0")}`} />
+                        <input type="date" name="from" className="form-control" defaultValue={`${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, '0')}-${new Date().getDate().toString().padStart(2, "0")}`} />
                     </div>
                     <div className="w-full">
                         <label className="block text-sm font-medium mb-2">Sampai Tanggal</label>
-                        <input type="until" name="until" className="form-control" defaultValue={`${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, '0')}-${new Date().getDate().toString().padStart(2, "0")}`} />
+                        <input type="date" name="until" className="form-control" defaultValue={`${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, '0')}-${new Date().getDate().toString().padStart(2, "0")}`} />
                     </div>
                 </div>
                 <div className="mb-4">
