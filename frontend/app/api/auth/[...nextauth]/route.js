@@ -2,7 +2,7 @@ import NextAuth from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import axios from '@/app/_lib/axiosConfig'
 
-export const authOptions = {
+const authOptions = {
     providers: [
         CredentialsProvider({
             name: 'Credentials',
@@ -20,25 +20,28 @@ export const authOptions = {
             },
         })
     ],
+    session: { jwt: true },
     callbacks: {
-        async jwt({ token, user, account }) {
+        jwt({ token, user, account }) {
             if (account?.provider === "credentials") {
-                token.id = user.id;
-                token.accessToken = user.token;
+                // token.id = user.id;
+                token.user = {
+                    accessToken: user.token,
+                    user_id: user.id
+                }
             }
 
             return token;
 
         },
-        async session({ session, token, user }) {
-            session.user.id = token.id
-            session.user.accessToken = token.accessToken
+        session({ session, token }) {
+            session.user = {
+                accessToken: token.user.accessToken,
+                user_id: token.user.user_id
+            }
             return session
 
         },
-    },
-    session: {
-        jwt: true,
     },
     pages: {
         signIn: '/login',
@@ -48,4 +51,4 @@ export const authOptions = {
 
 export const handler = NextAuth(authOptions)
 
-export { handler as GET, handler as POST }
+export { handler as GET, handler as POST, authOptions }

@@ -14,7 +14,7 @@ class CategoryController extends Controller
      */
     public function index(Request $request)
     {
-        $categories = Category::where('type', $request->jenis_transaksi ? $request->jenis_transaksi : 'pengeluaran')->get();
+        $categories = Category::where('type', $request->jenis_transaksi ? $request->jenis_transaksi : 'pengeluaran')->where('user_id', auth()->id())->get();
         // $categories = Category::where('user_id', auth()->user()->id)->orWhere('user_id', null)->get();
         return new CategoryCollection($categories);
     }
@@ -31,7 +31,7 @@ class CategoryController extends Controller
 
         $category = new Category();
         $category->name = $request->name;
-        $category->user_id = 1;
+        $category->user_id = auth()->id();
         $category->type = $request->jenis_transaksi;
         $category->save();
 
@@ -46,7 +46,7 @@ class CategoryController extends Controller
      */
     public function show(string $id)
     {
-        $category = Category::find($id);
+        $category = Category::where('user_id', auth()->id())->find($id);
 
         if (!$category) {
             return response()->json([
@@ -67,7 +67,7 @@ class CategoryController extends Controller
             'jenis_transaksi' => 'required|string'
         ]);
 
-        $category = Category::find($id);
+        $category = Category::where('user_id', auth()->id())->find($id);
 
         if (!$category) {
             return response()->json([
@@ -90,7 +90,7 @@ class CategoryController extends Controller
      */
     public function destroy(string $id)
     {
-        $category = Category::find($id);
+        $category = Category::where('user_id', auth()->id())->find($id);
 
         if (!$category) {
             return response()->json([

@@ -4,6 +4,11 @@ import { revalidatePath } from "next/cache"
 import { redirect } from 'next/navigation'
 import axios from '@/app/_lib/axiosConfig'
 
+
+async function user() {
+    return await axios.get(`/user`)
+}
+
 async function register(prevState, formData) {
     let success = false
     try {
@@ -30,4 +35,4 @@ async function register(prevState, formData) {
     }
 }
 
-export { register }
+export { register, user }

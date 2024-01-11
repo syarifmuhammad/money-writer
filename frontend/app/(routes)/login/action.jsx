@@ -11,12 +11,10 @@ const handleSignin = async (formData) => {
             email: formData.get('email'),
             password: formData.get('password'),
         })
-        cookieStore.set('API_TOKEN', res.data.token)
-        cookieStore.set('USER_DATA', JSON.parse(res.data.user))
 
         redirect('/')
     } catch (err) {
-        alert("Email atau password salah !")
+        redirect('/login')
     }
     
 }

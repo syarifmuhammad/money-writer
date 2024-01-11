@@ -29,14 +29,14 @@ class TransactionController extends Controller
         $date = explode('-', $request->month ?? date('Y-m'));
         $month = $date[1];
         $year = $date[0];
-        $response = Transaction::select(DB::raw('DATE(created_at) as date'))->whereYear('created_at', '=', $year)
+        $response = Transaction::select(DB::raw('DATE(created_at) as date'))->where('user_id', auth()->id())->whereYear('created_at', '=', $year)
             ->whereMonth('created_at', '=', $month)->orderBy('created_at')->distinct()->get();
 
         $total_pemasukan = 0;
         $total_pengeluaran = 0;
 
         foreach ($response as $key => $value) {
-            $transactions = Transaction::whereDate('created_at', $value->date)->get();
+            $transactions = Transaction::where('user_id', auth()->id())->whereDate('created_at', $value->date)->get();
             $response[$key]['transactions'] = $transactions;
             if ($transactions->count() > 0) {
                 foreach ($transactions as $transaction) {
@@ -71,12 +71,12 @@ class TransactionController extends Controller
 
         $pengeluaran = Transaction::whereHas('category', function ($query) {
             $query->where('type', 'pengeluaran');
-        })->select(DB::raw('SUM(amount) as total'))->whereYear('created_at', '=', $year)
+        })->select(DB::raw('SUM(amount) as total'))->where('user_id', auth()->id())->whereYear('created_at', '=', $year)
             ->whereMonth('created_at', '=', $month)->first();
 
         $pemasukan = Transaction::whereHas('category', function ($query) {
             $query->where('type', 'pemasukan');
-        })->select(DB::raw('SUM(amount) as total'))->whereYear('created_at', '=', $year)
+        })->select(DB::raw('SUM(amount) as total'))->where('user_id', auth()->id())->whereYear('created_at', '=', $year)
             ->whereMonth('created_at', '=', $month)->first();
         return response()->json([
             'pengeluaran' => $pengeluaran->total ?? 0,
@@ -84,7 +84,8 @@ class TransactionController extends Controller
         ]);
     }
 
-    public function report(Request $request) {
+    public function report(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             "from" => "required|date",
             "until" => "required|date|after_or_equal:from",
@@ -102,9 +103,9 @@ class TransactionController extends Controller
             if ($request->type != 'semua_jenis') {
                 $query->where('type', $request->type);
             }
-        })->whereBetween('created_at', [$request->from, $request->until])->get();
+        })->where('user_id', auth()->id())->whereBetween('created_at', [$request->from, $request->until])->get();
 
-        $pdf = PDF::loadView('pdf.transactions_report', [ 'transactions' => $transactions, 'from' => $request->from, 'until' => $request->until ]);
+        $pdf = PDF::loadView('pdf.transactions_report', ['transactions' => $transactions, 'from' => $request->from, 'until' => $request->until]);
 
         $nama_file = date('d-m-Y', strtotime($request->from)) . ' s.d ' . date('d-m-Y', strtotime($request->until));
         return $pdf->download("$nama_file.pdf");
@@ -133,7 +134,7 @@ class TransactionController extends Controller
         $transaction->amount = $request->amount;
         $transaction->description = $request->description ?? "";
         $transaction->category_id = $category->id;
-        $transaction->user_id = 1;
+        $transaction->user_id = auth()->id();
         $transaction->created_at = $request->date;
         $transaction->save();
 
@@ -148,7 +149,7 @@ class TransactionController extends Controller
      */
     public function show(string $id)
     {
-        $transaction = Transaction::find($id);
+        $transaction = Transaction::where('user_id', auth()->id())->find($id);
 
         if (!$transaction) {
             return response()->json([
@@ -178,7 +179,7 @@ class TransactionController extends Controller
             ], 422);
         }
 
-        $transaction = Transaction::find($id);
+        $transaction = Transaction::where('user_id', auth()->id())->find($id);
 
         if (!$transaction) {
             return response()->json([
@@ -205,7 +206,7 @@ class TransactionController extends Controller
      */
     public function destroy(string $id)
     {
-        $transaction = Transaction::find($id);
+        $transaction = Transaction::where('user_id', auth()->id())->find($id);
 
         if (!$transaction) {
             return response()->json([

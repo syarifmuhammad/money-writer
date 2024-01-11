@@ -4,13 +4,18 @@ import Header from "@/app/_components/Header";
 import Link from 'next/link';
 import { BiArrowBack } from "react-icons/bi";
 import axios from '@/app/_lib/axiosConfig'
+import { getSession } from "next-auth/react"
 
 export default function ReportPage() {
-
     async function download(e) {
         e.preventDefault()
+        const session = await getSession()
         const data = new FormData(e.target)
-        const res = await axios.get('/report', { params: { ...Object.fromEntries(data) }, responseType: 'blob' })
+        const res = await axios.get('/report', {
+            params: { ...Object.fromEntries(data) }, responseType: 'blob', headers: {
+                Authorization: `Bearer ${session?.user?.accessToken}`
+            }
+        })
         const url = window.URL.createObjectURL(new Blob([res.data]))
         const link = document.createElement('a')
         link.href = url
